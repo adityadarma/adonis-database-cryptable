@@ -1,0 +1,14 @@
+{{{
+  exports({ to: app.configPath('datatables.ts') })
+}}}
+import { defineConfig } from '@adityadarma/adonis-lucid-cryptable/types'
+import env from '#start/env'
+
+const cryptableConfig = defineConfig({
+  default: 'mysql',
+  drivers: [
+    'mysql'
+  ],
+  key: env.get('APP_KEY')
+})
+export default cryptableConfig
