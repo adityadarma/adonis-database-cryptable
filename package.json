@@ -1,7 +1,7 @@
 {
-  "name": "@adityadarma/adonis-lucid-cryptable",
+  "name": "@adityadarma/adonis-database-cryptable",
   "description": "Package server side datatables on AdonisJS",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "engines": {
     "node": ">=20.6.0"
   },
@@ -20,7 +20,9 @@
     ".": "./build/index.js",
     "./cryptable_provider": "./build/providers/cryptable_provider.js",
     "./cryptable": "./build/services/main.js",
-    "./types": "./build/src/types/index.js"
+    "./define_config": "./build/src/define_config/index.js",
+    "./types": "./build/src/types/index.js",
+    "./decorator": "./build/src/decorator/index.js"
   },
   "scripts": {
     "clean": "del-cli build",
@@ -104,6 +106,6 @@
   "prettier": "@adonisjs/prettier-config",
   "repository": {
     "type": "git",
-    "url": "https://github.com/adityadarma/adonis-lucid-cryptable"
+    "url": "https://github.com/adityadarma/adonis-database-cryptable"
   }
 }
