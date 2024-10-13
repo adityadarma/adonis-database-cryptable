@@ -25,18 +25,14 @@ import env from '#start/env'
 const cryptableConfig = defineConfig({
   key: env.get('APP_KEY'),
   default: 'mysql',
-  drivers: [
-    'mysql'
-  ]
+  drivers: ['mysql'],
 })
 export default cryptableConfig
-
 ```
 
 ### Adding to Model
 
 You can choise what column will you encrypt with decorator `@columnCryptable()`.
-
 
 ```ts
 @columnCryptable()
@@ -48,6 +44,36 @@ declare email: string
 @column()
 declare emailVerifiedAt: DateTime
 ```
+
+### Searching Encrypted Fields Example:
+Searching encrypted field can be done by calling the `whereEncrypted` and `orWhereEncrypted` functions
+similar to laravel eloquent `where` and `orWhere`. Ordering encrypted data can be calling `orderByEncrypted` laravel eloquent `orderBy`.
+
+
+```ts
+  export default class UsersController {
+    async index()
+    {
+        const user = await User.query()
+          .whereEncrypted('first_name','john')
+          .orWhereEncrypted('last_name','!=','Doe')
+          .orderByEncrypted('last_name', 'asc')
+          .first();
+        
+        return user;
+    }
+  }
+```
+
+## Credits
+
+This package was inspired from the following:
+
+- [elgiborsolution/laravel-database-encryption](https://github.com/elgiborsolution/laravel-database-encryption)
+
+## License
+
+Adonis Datatables is open-sourced software licensed under the [MIT license](LICENSE.md).
 
 [gh-workflow-image]: https://img.shields.io/github/actions/workflow/status/adityadarma/adonis-database-cryptable/release.yml?style=for-the-badge
 [gh-workflow-url]: https://github.com/adityadarma/adonis-database-cryptable/actions/workflows/release.yml 'Github action'
