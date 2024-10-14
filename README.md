@@ -46,23 +46,42 @@ declare emailVerifiedAt: DateTime
 ```
 
 ### Searching Encrypted Fields Example:
+
 Searching encrypted field can be done by calling the `whereEncrypted` and `orWhereEncrypted` functions
 similar to laravel eloquent `where` and `orWhere`. Ordering encrypted data can be calling `orderByEncrypted` laravel eloquent `orderBy`.
 
+```ts
+export default class UsersController {
+  async index() {
+    const user = await User.query()
+      .whereEncrypted('first_name', 'john')
+      .orWhereEncrypted('last_name', '!=', 'Doe')
+      .orderByEncrypted('last_name', 'asc')
+      .first()
+
+    return user
+  }
+}
+```
+
+### Validate value
+
+Validate data encrypted in database in VineJS. You can apply on `unique` or `exists` method.
 
 ```ts
-  export default class UsersController {
-    async index()
-    {
-        const user = await User.query()
-          .whereEncrypted('first_name','john')
-          .orWhereEncrypted('last_name','!=','Doe')
-          .orderByEncrypted('last_name', 'asc')
-          .first();
-        
-        return user;
-    }
-  }
+export const updateUserValidator = vine
+  .compile(
+    vine.object({
+      email: vine.string().unique(async (db, value, field) => {
+        const user = await db
+          .from('users')
+          .whereNot('id', field.meta.userId)
+          .whereEncrypted('email', value)
+          .first()
+        return !user
+      })
+    })
+  )
 ```
 
 ## Credits

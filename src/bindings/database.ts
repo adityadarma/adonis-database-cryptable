@@ -4,7 +4,7 @@ import { cryptable } from '../../services/main.js'
 /**
  * Define Method binding to DatabaseQueryBuilder
  */
-export function extendMethodDatabase(builder: any) {
+export function defineMethodDatabase(builder: any) {
   builder.macro(
     'whereEncrypted',
     function (this: DatabaseQueryBuilder, columns: string, value: any) {

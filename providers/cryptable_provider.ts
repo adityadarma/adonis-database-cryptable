@@ -2,10 +2,10 @@ import type { ApplicationService } from '@adonisjs/core/types'
 import { Exception } from '@adonisjs/core/exceptions'
 import { CryptableInterface } from '../src/types/index.js'
 import MySql from '../src/adapters/mysql.js'
-import { extendMethodModel } from '../src/bindings/model.js'
-import { extendMethodDatabase } from '../src/bindings/database.js'
+import { defineMethodModel } from '../src/bindings/model.js'
+import { defineMethodDatabase } from '../src/bindings/database.js'
 
-export default class StorageProvider {
+export default class CryptableProvider {
   constructor(protected app: ApplicationService) {}
 
   /**
@@ -18,6 +18,7 @@ export default class StorageProvider {
 
       switch (driver) {
         case 'mysql':
+        case 'mariadb':
           return new MySql(key)
 
         default:
@@ -33,8 +34,8 @@ export default class StorageProvider {
     const { DatabaseQueryBuilder } = await this.app.import('@adonisjs/lucid/database')
     const { ModelQueryBuilder } = await this.app.import('@adonisjs/lucid/orm')
 
-    extendMethodDatabase(DatabaseQueryBuilder)
-    extendMethodModel(ModelQueryBuilder)
+    defineMethodDatabase(DatabaseQueryBuilder)
+    defineMethodModel(ModelQueryBuilder)
   }
 
   /**

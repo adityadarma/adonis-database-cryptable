@@ -1,23 +1,15 @@
-export type DriverCryptable = 'mysql'
-
 /**
  * Cryptable config
  */
-export type CryptableConfig = {
-  default: DriverCryptable
-  drivers: ['mysql']
+export type CryptableConfig<CryptableDriver extends string[]> = {
   key: string
+  default: CryptableDriver[number]
+  drivers: CryptableDriver
 }
 
-/**
- * Define the disk config. The config object must have a default property
- * pointing to the key within the disk object.
- */
-export declare function defineConfig(config: CryptableConfig): CryptableConfig
+export type DecoratorCryptableFn = (target: any, property: string) => void
 
-export type DecoratorStorage = (target: any, property: string) => void
-
-export type StorageDecorator = () => DecoratorStorage
+export type CryptableDecorator = () => DecoratorCryptableFn
 
 export interface CryptableInterface {
   getKey(): string
@@ -28,7 +20,3 @@ export interface CryptableInterface {
 
   isEncrypted(value: any): boolean
 }
-
-export type DecoratorCryptableFn = (target: any, property: string) => void
-
-export type CryptableDecorator = () => DecoratorCryptableFn
