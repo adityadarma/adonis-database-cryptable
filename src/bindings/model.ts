@@ -4,7 +4,7 @@ import { cryptable } from '../../services/main.js'
 /**
  * Define Method binding to ModelQueryBuilder
  */
-export function extendMethodModel(builder: any) {
+export function defineMethodModel(builder: any) {
   builder.macro('whereEncrypted', function (this: ModelQueryBuilder, columns: string, value: any) {
     const key = cryptable.getKey()
     return this.whereRaw(
