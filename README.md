@@ -4,6 +4,8 @@
 
 [![gh-workflow-image]][gh-workflow-url] [![npm-image]][npm-url] [![npm-downloads]][npm-downloads] ![][typescript-image] [![license-image]][license-url]
 
+> This version 2.x is Mayor update, please check parameter in model
+
 Database Encryption is a feature that allows developers to store data with encrypted and consume again with data decrypted. This feature provides a structured and organized approach to managing application database, making it easier to query.
 
 ## Installation
@@ -32,17 +34,10 @@ export default cryptableConfig
 
 ### Adding to Model
 
-You can choise what column will you encrypt with decorator `@columnCryptable()`.
+You can add what column will you encrypt with parameter in your model.
 
 ```ts
-@columnCryptable()
-declare name: string
-
-@columnCryptable()
-declare email: string
-
-@column()
-declare emailVerifiedAt: DateTime
+$cryptable: string[] = ['name']
 ```
 
 ### Searching Encrypted Fields Example:
@@ -82,12 +77,6 @@ export const updateUserValidator = vine.compile(
   })
 )
 ```
-
-## Credits
-
-This package was inspired from the following:
-
-- [elgiborsolution/laravel-database-encryption](https://github.com/elgiborsolution/laravel-database-encryption)
 
 ## License
 
