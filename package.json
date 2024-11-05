@@ -1,7 +1,7 @@
 {
   "name": "@adityadarma/adonis-database-cryptable",
   "description": "Package to allows developers store data with encrypted and consume again with data decrypted",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "engines": {
     "node": ">=20.6.0"
   },
@@ -109,9 +109,18 @@
           "name": "angular"
         },
         "releaseRules": [
-          { "type": "breaking", "release": "major" },
-          { "type": "feat", "release": "minor" },
-          { "type": "fix", "release": "patch" }
+          {
+            "type": "breaking",
+            "release": "major"
+          },
+          {
+            "type": "feat",
+            "release": "minor"
+          },
+          {
+            "type": "fix",
+            "release": "patch"
+          }
         ]
       }
     }
