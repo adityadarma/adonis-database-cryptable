@@ -11,12 +11,12 @@ export type DecoratorCryptableFn = (target: any, property: string) => void
 
 export type CryptableDecorator = () => DecoratorCryptableFn
 
-export interface CryptableInterface {
+export interface Cryptable {
   getKey(): string
 
-  encrypt(value: any): string
+  encrypt(value: any): Promise<string>
 
-  decrypt(value: string): any
+  decrypt(value: string): Promise<any>
 
-  isEncrypted(value: any): boolean
+  isEncrypted(value: any): Promise<boolean>
 }

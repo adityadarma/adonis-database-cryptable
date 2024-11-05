@@ -1,9 +1,10 @@
 import type { ApplicationService } from '@adonisjs/core/types'
+import { Cryptable } from '../src/types/index.js'
 import { Exception } from '@adonisjs/core/exceptions'
-import { CryptableInterface } from '../src/types/index.js'
 import MySql from '../src/adapters/mysql.js'
-import { defineMethodModel } from '../src/bindings/model.js'
-import { defineMethodDatabase } from '../src/bindings/database.js'
+import PostgreSql from '../src/adapters/postgres.js'
+import { defineMethodModelMysql } from '../src/bindings/mysql.js'
+import { defineMethodModelPostgres } from '../src/bindings/postgres.js'
 
 export default class CryptableProvider {
   constructor(protected app: ApplicationService) {}
@@ -18,8 +19,10 @@ export default class CryptableProvider {
 
       switch (driver) {
         case 'mysql':
-        case 'mariadb':
           return new MySql(key)
+
+        case 'postgres':
+          return new PostgreSql(key)
 
         default:
           throw new Exception('Driver not found')
@@ -31,32 +34,27 @@ export default class CryptableProvider {
    * The container bindings have booted
    */
   async boot() {
-    const { DatabaseQueryBuilder } = await this.app.import('@adonisjs/lucid/database')
     const { ModelQueryBuilder } = await this.app.import('@adonisjs/lucid/orm')
+    const driver = this.app.config.get<string>(`cryptable.default`)
 
-    defineMethodDatabase(DatabaseQueryBuilder)
-    defineMethodModel(ModelQueryBuilder)
+    switch (driver) {
+      case 'mysql':
+        defineMethodModelMysql(ModelQueryBuilder)
+        break
+
+      case 'postgres':
+        defineMethodModelPostgres(ModelQueryBuilder)
+        break
+
+      default:
+        throw new Exception('Driver not found')
+    }
   }
-
-  /**
-   * The application has been booted
-   */
-  async start() {}
-
-  /**
-   * The process has been started
-   */
-  async ready() {}
-
-  /**
-   * Preparing to shut down the app
-   */
-  async shutdown() {}
 }
 
 declare module '@adonisjs/core/types' {
   interface ContainerBindings {
-    cryptable: CryptableInterface
+    cryptable: Cryptable
   }
 }
 
@@ -69,14 +67,6 @@ declare module '@adonisjs/lucid/types/querybuilder' {
 
   interface OrderByEncrypted<Builder extends ChainableContract> {
     (column: string, direction?: 'asc' | 'desc'): Builder
-  }
-}
-
-declare module '@adonisjs/lucid/database' {
-  export interface DatabaseQueryBuilder {
-    whereEncrypted(columns: string, value: any): this
-    orWhereEncrypted(columns: string, value: any): this
-    orderByEncrypted(columns: string, direction?: string): this
   }
 }
 

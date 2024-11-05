@@ -1,10 +1,10 @@
 import app from '@adonisjs/core/services/app'
-import { CryptableInterface } from '../src/types/index.js'
+import { Cryptable } from '../src/types/index.js'
 
-let cryptable: CryptableInterface
+let cryptable: Cryptable
 
 /**
- * Returns data storage
+ * Returns data cryptable
  */
 await app.booted(async () => {
   cryptable = await app.container.make('cryptable')

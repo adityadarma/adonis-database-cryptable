@@ -16,7 +16,7 @@ node ace add @adityadarma/adonis-database-cryptable
 
 ### Configuration
 
-You can configuration encryption data from file config. for now only support `mysql or mariadb` database.
+You can configuration encryption data from file config. for now only support `mysql or postgres` database.
 
 ```ts
 import { defineConfig } from '@adityadarma/adonis-database-cryptable/define_config'
@@ -25,7 +25,7 @@ import env from '#start/env'
 const cryptableConfig = defineConfig({
   key: env.get('APP_KEY'),
   default: 'mysql',
-  drivers: ['mysql'],
+  drivers: ['mysql', 'postgres'],
 })
 export default cryptableConfig
 ```
@@ -69,19 +69,18 @@ export default class UsersController {
 Validate data encrypted in database in VineJS. You can apply on `unique` or `exists` method.
 
 ```ts
-export const updateUserValidator = vine
-  .compile(
-    vine.object({
-      email: vine.string().unique(async (db, value, field) => {
-        const user = await db
-          .from('users')
-          .whereNot('id', field.meta.userId)
-          .whereEncrypted('email', value)
-          .first()
-        return !user
-      })
-    })
-  )
+export const updateUserValidator = vine.compile(
+  vine.object({
+    email: vine.string().unique(async (db, value, field) => {
+      const user = await db
+        .from('users')
+        .whereNot('id', field.meta.userId)
+        .whereEncrypted('email', value)
+        .first()
+      return !user
+    }),
+  })
+)
 ```
 
 ## Credits
