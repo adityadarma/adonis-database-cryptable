@@ -3,24 +3,24 @@ import { Cryptable } from '../types/index.js'
 import * as _ from 'lodash'
 
 export default class MySql implements Cryptable {
-  private algorithm: string = 'aes-128-ecb'
-  private key: string
+  private algorithm: string
+  private key: Buffer
 
   constructor(key: string) {
-    this.key = key
+    this.algorithm = 'aes-128-ecb'
+    this.key = Buffer.from(key).slice(0, 16)
   }
 
   getKey(): string {
-    return this.key
+    return this.key.toString()
   }
 
   async encrypt(value: any): Promise<string> {
+    if (typeof value !== 'string') {
+      value = value.toString()
+    }
     const cipher = createCipheriv(this.algorithm, this.key, null)
-    let encrypted = cipher.update(
-      _.cloneDeepWith(value, (val) => val.toString()),
-      'utf8',
-      'base64'
-    )
+    let encrypted = cipher.update(value, 'utf8', 'base64')
     encrypted += cipher.final('base64')
     return encrypted
   }
