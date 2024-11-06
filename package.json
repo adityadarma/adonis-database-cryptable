@@ -1,7 +1,7 @@
 {
   "name": "@adityadarma/adonis-database-cryptable",
   "description": "Package to allows developers store data with encrypted and consume again with data decrypted",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "engines": {
     "node": ">=20.6.0"
   },
