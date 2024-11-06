@@ -14,6 +14,10 @@ Database Encryption is a feature that allows developers to store data with encry
 node ace add @adityadarma/adonis-database-cryptable
 ```
 
+###
+
+> if you use postgres, must install `openpgp` package
+
 ## Usage
 
 ### Configuration
