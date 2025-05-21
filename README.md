@@ -16,7 +16,7 @@ node ace add @adityadarma/adonis-database-cryptable
 
 ###
 
-> if you use postgres, must install `openpgp` package
+> if you use postgres, must install `openpgp` package and `pgcrypto` extension
 
 ## Usage
 
@@ -25,7 +25,7 @@ node ace add @adityadarma/adonis-database-cryptable
 You can configuration encryption data from file config. for now only support `mysql or postgres` database.
 
 ```ts
-import { defineConfig } from '@adityadarma/adonis-database-cryptable/define_config'
+import { defineConfig } from '@adityadarma/adonis-database-cryptable'
 import env from '#start/env'
 
 const cryptableConfig = defineConfig({

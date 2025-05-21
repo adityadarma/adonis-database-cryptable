@@ -1,7 +1,7 @@
 {{{
   exports({ to: app.configPath('cryptable.ts') })
 }}}
-import { defineConfig } from '@adityadarma/adonis-database-cryptable/define_config'
+import { defineConfig } from '@adityadarma/adonis-database-cryptable'
 import env from '#start/env'
 
 const cryptableConfig = defineConfig({

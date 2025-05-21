@@ -20,7 +20,6 @@
     ".": "./build/index.js",
     "./cryptable_provider": "./build/providers/cryptable_provider.js",
     "./cryptable": "./build/services/main.js",
-    "./define_config": "./build/src/define_config/index.js",
     "./decorator": "./build/src/decorator/index.js"
   },
   "scripts": {
