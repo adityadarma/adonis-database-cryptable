@@ -7,10 +7,6 @@ export default class PostgreSql implements Cryptable {
     this.key = key
   }
 
-  getKey(): string {
-    return this.key as string
-  }
-
   async encrypt(value: any): Promise<string> {
     const openpgp = await import('openpgp')
     const message = await openpgp.createMessage({ text: value })

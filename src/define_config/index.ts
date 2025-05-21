@@ -1,7 +1,7 @@
-import { CryptableConfig } from '../types/index.js'
+import { CryptableConfig, CryptableDriverName } from '../types/index.js'
 
-export function defineConfig<CryptableDriver extends string[]>(
-  config: CryptableConfig<CryptableDriver>
-): CryptableConfig<CryptableDriver> {
+export function defineConfig<Driver extends CryptableDriverName>(
+  config: CryptableConfig<Driver>
+): CryptableConfig<Driver> {
   return config
 }

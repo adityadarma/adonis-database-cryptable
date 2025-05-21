@@ -25,7 +25,7 @@ export function Cryptable<T extends NormalizeConstructor<typeof BaseModel>>(supe
             field.$attributes[key] !== undefined &&
             field.$attributes[key] !== ''
           ) {
-            const value = await cryptable.encrypt(field.$attributes[key])
+            const value = await cryptable.use(this.connection).encrypt(field.$attributes[key])
             field.$setAttribute(key, value)
           }
         }
@@ -42,7 +42,7 @@ export function Cryptable<T extends NormalizeConstructor<typeof BaseModel>>(supe
             field.$attributes[key] !== undefined &&
             field.$attributes[key] !== ''
           ) {
-            const value = await cryptable.decrypt(field.$attributes[key])
+            const value = await cryptable.use(this.connection).decrypt(field.$attributes[key])
             field.$setAttribute(key, value)
           }
         }
@@ -60,7 +60,7 @@ export function Cryptable<T extends NormalizeConstructor<typeof BaseModel>>(supe
               field.$attributes[key] !== undefined &&
               field.$attributes[key] !== ''
             ) {
-              const value = await cryptable.decrypt(field.$attributes[key])
+              const value = await cryptable.use(this.connection).decrypt(field.$attributes[key])
               field.$setAttribute(key, value)
             }
           }

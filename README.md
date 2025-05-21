@@ -30,8 +30,7 @@ import env from '#start/env'
 
 const cryptableConfig = defineConfig({
   key: env.get('APP_KEY'),
-  default: 'mysql',
-  drivers: ['mysql', 'postgres'],
+  default: 'mysql', // available mysql or postgres
 })
 export default cryptableConfig
 ```

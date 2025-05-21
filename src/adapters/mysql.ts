@@ -11,10 +11,6 @@ export default class MySql implements Cryptable {
     this.key = Buffer.from(key).slice(0, 16)
   }
 
-  getKey(): string {
-    return this.key.toString()
-  }
-
   async encrypt(value: any): Promise<string> {
     if (typeof value !== 'string') {
       value = value.toString()
