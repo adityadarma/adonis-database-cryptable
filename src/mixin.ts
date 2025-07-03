@@ -8,7 +8,7 @@
  */
 
 import type { NormalizeConstructor } from '@adonisjs/core/types/helpers'
-import { afterFetch, afterFind, BaseModel, beforeSave } from '@adonisjs/lucid/orm'
+import { afterFetch, afterFind, afterSave, BaseModel, beforeSave } from '@adonisjs/lucid/orm'
 import { cryptable } from '../services/main.js'
 
 export function Cryptable<T extends NormalizeConstructor<typeof BaseModel>>(superclass: T) {
@@ -63,6 +63,23 @@ export function Cryptable<T extends NormalizeConstructor<typeof BaseModel>>(supe
               const value = await cryptable.use(this.connection).decrypt(field.$attributes[key])
               field.$setAttribute(key, value)
             }
+          }
+        }
+      }
+    }
+
+    @afterSave()
+    static async decryptSaveField<K extends ModelCryptable>(field: K): Promise<void> {
+      if (field.$cryptable) {
+        for (const key of Object.keys(field.$attributes)) {
+          if (
+            field.$cryptable.includes(key) &&
+            field.$attributes[key] !== null &&
+            field.$attributes[key] !== undefined &&
+            field.$attributes[key] !== ''
+          ) {
+            const value = await cryptable.use(this.connection).decrypt(field.$attributes[key])
+            field.$setAttribute(key, value)
           }
         }
       }
