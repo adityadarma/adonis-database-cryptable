@@ -34,9 +34,14 @@ declare module '@adonisjs/core/types' {
 
 declare module '@adonisjs/lucid/types/querybuilder' {
   export interface ChainableContract {
-    whereEncrypted: Where<this>
-    orWhereEncrypted: Where<this>
+    whereEncrypted: WhereEncrypted<this>
+    orWhereEncrypted: WhereEncrypted<this>
     orderByEncrypted: OrderByEncrypted<this>
+  }
+
+  interface WhereEncrypted<Builder extends ChainableContract> {
+    (key: string | RawQuery, value: StrictValues | ChainableContract): Builder
+    (key: string | RawQuery, operator: string, value: StrictValues | ChainableContract): Builder
   }
 
   interface OrderByEncrypted<Builder extends ChainableContract> {
@@ -46,8 +51,8 @@ declare module '@adonisjs/lucid/types/querybuilder' {
 
 declare module '@adonisjs/lucid/orm' {
   export interface ModelQueryBuilder {
-    whereEncrypted(columns: string, value: any): this
-    orWhereEncrypted(columns: string, value: any): this
+    whereEncrypted(key: any, operator: any, value?: any): this
+    orWhereEncrypted(key: any, operator: any, value?: any): this
     orderByEncrypted(columns: string, direction?: string): this
   }
 }
