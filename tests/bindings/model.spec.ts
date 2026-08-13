@@ -12,54 +12,52 @@ import { SECRET_KEY, createDatabase, setupApp } from '../helpers.js'
 
 await setupApp()
 
-const { defineMethodModelMySql } = await import('../../src/bindings/model_mysql.js')
-const { defineMethodModelPostgres } = await import('../../src/bindings/model_postgres.js')
+const { defineMethodModel } = await import('../../src/bindings/model.js')
 const { BaseModel, column, Adapter, ModelQueryBuilder } = await import('@adonisjs/lucid/orm')
 
+defineMethodModel(ModelQueryBuilder)
+
 test.group('Bindings | model query builder', (group) => {
-  let User: any
+  let MysqlUser: any
+  let PostgresUser: any
+  let SqliteUser: any
 
   group.setup(async () => {
     const db = await createDatabase()
     BaseModel.useAdapter(new Adapter(db) as any)
 
-    class UserModel extends BaseModel {
-      static table = 'users'
-      static connection = 'mysql'
+    /**
+     * One model per connection, all sharing the same macros. This is what
+     * the per driver bindings could not support.
+     */
+    const modelFor = (connectionName: string) => {
+      class UserModel extends BaseModel {
+        static table = 'users'
+        static connection = connectionName
 
-      @column({ isPrimary: true })
-      declare id: number
+        @column({ isPrimary: true })
+        declare id: number
 
-      @column()
-      declare name: string
+        @column()
+        declare name: string
 
-      @column()
-      declare email: string
+        @column()
+        declare email: string
+      }
+
+      UserModel.boot()
+      return UserModel
     }
 
-    UserModel.boot()
-    User = UserModel
+    MysqlUser = modelFor('mysql')
+    PostgresUser = modelFor('postgres')
+    SqliteUser = modelFor('sqlite')
 
     return () => db.manager.closeAll()
   })
 
-  /**
-   * Both binding files register macros under the same names on the shared
-   * "ModelQueryBuilder" prototype, so the driver under test has to be
-   * re-applied before every assertion.
-   */
-  const query = (driver: 'mysql' | 'postgres') => {
-    if (driver === 'mysql') {
-      defineMethodModelMySql(ModelQueryBuilder)
-    } else {
-      defineMethodModelPostgres(ModelQueryBuilder)
-    }
-
-    return User.query() as any
-  }
-
   test('register the macros on the model query builder', ({ assert }) => {
-    const builder = query('mysql')
+    const builder = MysqlUser.query() as any
 
     assert.isFunction(builder.whereEncrypted)
     assert.isFunction(builder.orWhereEncrypted)
@@ -67,7 +65,7 @@ test.group('Bindings | model query builder', (group) => {
   })
 
   test('mysql | whereEncrypted builds an AES_DECRYPT clause', ({ assert }) => {
-    const sql = query('mysql').whereEncrypted('name', 'john doe').toQuery()
+    const sql = (MysqlUser.query() as any).whereEncrypted('name', 'john doe').toQuery()
 
     assert.include(sql, `AES_DECRYPT(FROM_BASE64(name), '${SECRET_KEY}')`)
     assert.include(sql, 'USING utf8mb4')
@@ -76,19 +74,19 @@ test.group('Bindings | model query builder', (group) => {
 
   test('mysql | whereEncrypted defaults the operator to "="', ({ assert }) => {
     assert.equal(
-      query('mysql').whereEncrypted('name', 'john doe').toQuery(),
-      query('mysql').whereEncrypted('name', '=', 'john doe').toQuery()
+      (MysqlUser.query() as any).whereEncrypted('name', 'john doe').toQuery(),
+      (MysqlUser.query() as any).whereEncrypted('name', '=', 'john doe').toQuery()
     )
   })
 
   test('mysql | whereEncrypted honours a custom operator', ({ assert }) => {
-    const sql = query('mysql').whereEncrypted('name', 'like', '%john%').toQuery()
+    const sql = (MysqlUser.query() as any).whereEncrypted('name', 'like', '%john%').toQuery()
 
     assert.include(sql, `like '%john%'`)
   })
 
   test('mysql | orWhereEncrypted appends an "or" clause', ({ assert }) => {
-    const sql = query('mysql')
+    const sql = (MysqlUser.query() as any)
       .whereEncrypted('name', 'john')
       .orWhereEncrypted('email', 'jane@example.com')
       .toQuery()
@@ -99,21 +97,22 @@ test.group('Bindings | model query builder', (group) => {
 
   test('mysql | orWhereEncrypted defaults the operator to "="', ({ assert }) => {
     assert.equal(
-      query('mysql').orWhereEncrypted('name', 'john doe').toQuery(),
-      query('mysql').orWhereEncrypted('name', '=', 'john doe').toQuery()
+      (MysqlUser.query() as any).orWhereEncrypted('name', 'john doe').toQuery(),
+      (MysqlUser.query() as any).orWhereEncrypted('name', '=', 'john doe').toQuery()
     )
   })
 
   test('mysql | orderByEncrypted decrypts the column', ({ assert }) => {
-    const sql = query('mysql').orderByEncrypted('name', 'desc').toQuery()
+    const sql = (MysqlUser.query() as any).orderByEncrypted('name', 'desc').toQuery()
 
     assert.include(sql, 'order by')
     assert.include(sql, `AES_DECRYPT(FROM_BASE64(name), '${SECRET_KEY}')`)
     assert.include(sql, 'desc')
+    assert.notInclude(sql, 'lower(')
   })
 
   test('postgres | whereEncrypted builds a pgp_sym_decrypt clause', ({ assert }) => {
-    const sql = query('postgres').whereEncrypted('name', 'john doe').toQuery()
+    const sql = (PostgresUser.query() as any).whereEncrypted('name', 'john doe').toQuery()
 
     assert.include(sql, `pgp_sym_decrypt(decode(name,'base64')::bytea , '${SECRET_KEY}')`)
     assert.include(sql, `'UTF-8'`)
@@ -122,19 +121,19 @@ test.group('Bindings | model query builder', (group) => {
 
   test('postgres | whereEncrypted defaults the operator to "="', ({ assert }) => {
     assert.equal(
-      query('postgres').whereEncrypted('name', 'john doe').toQuery(),
-      query('postgres').whereEncrypted('name', '=', 'john doe').toQuery()
+      (PostgresUser.query() as any).whereEncrypted('name', 'john doe').toQuery(),
+      (PostgresUser.query() as any).whereEncrypted('name', '=', 'john doe').toQuery()
     )
   })
 
   test('postgres | whereEncrypted honours a custom operator', ({ assert }) => {
-    const sql = query('postgres').whereEncrypted('name', 'like', '%john%').toQuery()
+    const sql = (PostgresUser.query() as any).whereEncrypted('name', 'like', '%john%').toQuery()
 
     assert.include(sql, `like '%john%'`)
   })
 
   test('postgres | orWhereEncrypted appends an "or" clause', ({ assert }) => {
-    const sql = query('postgres')
+    const sql = (PostgresUser.query() as any)
       .whereEncrypted('name', 'john')
       .orWhereEncrypted('email', 'jane@example.com')
       .toQuery()
@@ -145,21 +144,58 @@ test.group('Bindings | model query builder', (group) => {
 
   test('postgres | orWhereEncrypted defaults the operator to "="', ({ assert }) => {
     assert.equal(
-      query('postgres').orWhereEncrypted('name', 'john doe').toQuery(),
-      query('postgres').orWhereEncrypted('name', '=', 'john doe').toQuery()
+      (PostgresUser.query() as any).orWhereEncrypted('name', 'john doe').toQuery(),
+      (PostgresUser.query() as any).orWhereEncrypted('name', '=', 'john doe').toQuery()
     )
   })
 
   test('postgres | orderByEncrypted lowercases the decrypted column', ({ assert }) => {
-    const sql = query('postgres').orderByEncrypted('name', 'asc').toQuery()
+    const sql = (PostgresUser.query() as any).orderByEncrypted('name', 'asc').toQuery()
 
     assert.include(sql, 'order by')
     assert.include(sql, 'lower(convert_from(')
     assert.include(sql, 'asc')
   })
 
+  test('serve both drivers at the same time', ({ assert }) => {
+    // The macros resolve the expression per connection, so a single
+    // registration is correct for every driver in the process.
+    const mysql = (MysqlUser.query() as any).whereEncrypted('name', 'john').toQuery()
+    const postgres = (PostgresUser.query() as any).whereEncrypted('name', 'john').toQuery()
+
+    assert.include(mysql, 'AES_DECRYPT')
+    assert.notInclude(mysql, 'pgp_sym_decrypt')
+
+    assert.include(postgres, 'pgp_sym_decrypt')
+    assert.notInclude(postgres, 'AES_DECRYPT')
+  })
+
+  test('stay correct when the same driver is queried again', ({ assert }) => {
+    const first = (MysqlUser.query() as any).whereEncrypted('name', 'john').toQuery()
+    void (PostgresUser.query() as any).whereEncrypted('name', 'john').toQuery()
+    const second = (MysqlUser.query() as any).whereEncrypted('name', 'john').toQuery()
+
+    assert.equal(first, second)
+  })
+
+  test('leave the query untouched on an unsupported connection', ({ assert }) => {
+    const plain = (SqliteUser.query() as any).toQuery()
+
+    assert.equal((SqliteUser.query() as any).whereEncrypted('name', 'john').toQuery(), plain)
+    assert.equal((SqliteUser.query() as any).orWhereEncrypted('name', 'john').toQuery(), plain)
+    assert.equal((SqliteUser.query() as any).orderByEncrypted('name', 'asc').toQuery(), plain)
+  })
+
   test('return the builder to keep the chain fluent', ({ assert }) => {
-    const builder = query('mysql')
+    const builder = MysqlUser.query() as any
+
+    assert.strictEqual(builder.whereEncrypted('name', 'john'), builder)
+    assert.strictEqual(builder.orWhereEncrypted('name', 'john'), builder)
+    assert.strictEqual(builder.orderByEncrypted('name', 'asc'), builder)
+  })
+
+  test('return the builder on an unsupported connection too', ({ assert }) => {
+    const builder = SqliteUser.query() as any
 
     assert.strictEqual(builder.whereEncrypted('name', 'john'), builder)
     assert.strictEqual(builder.orWhereEncrypted('name', 'john'), builder)
@@ -167,7 +203,7 @@ test.group('Bindings | model query builder', (group) => {
   })
 
   test('combine with the regular model query builder methods', ({ assert }) => {
-    const sql = query('mysql')
+    const sql = (MysqlUser.query() as any)
       .select('id')
       .where('id', '>', 1)
       .whereEncrypted('name', 'john')
@@ -179,28 +215,5 @@ test.group('Bindings | model query builder', (group) => {
     assert.include(sql, 'AES_DECRYPT')
     assert.include(sql, 'order by')
     assert.include(sql, 'limit 10')
-  })
-
-  test('the binding applied last wins on the shared prototype', ({ assert }) => {
-    // Both bindings patch the same prototype under the same names, so they
-    // cannot be active at once. The manager re-applies the right one on
-    // every "use()" call, which is what keeps this safe in practice.
-    defineMethodModelMySql(ModelQueryBuilder)
-    defineMethodModelPostgres(ModelQueryBuilder)
-
-    const sql = (User.query() as any).whereEncrypted('name', 'john').toQuery()
-
-    assert.include(sql, 'pgp_sym_decrypt')
-    assert.notInclude(sql, 'AES_DECRYPT')
-  })
-
-  test('re-applying the mysql binding takes the prototype back over', ({ assert }) => {
-    defineMethodModelPostgres(ModelQueryBuilder)
-    defineMethodModelMySql(ModelQueryBuilder)
-
-    const sql = (User.query() as any).whereEncrypted('name', 'john').toQuery()
-
-    assert.include(sql, 'AES_DECRYPT')
-    assert.notInclude(sql, 'pgp_sym_decrypt')
   })
 })

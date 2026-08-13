@@ -1,6 +1,7 @@
 import type { ApplicationService } from '@adonisjs/core/types'
 import CryptableManager from '../src/manager.js'
 import { defineMethodDatabase } from '../src/bindings/database.js'
+import { defineMethodModel } from '../src/bindings/model.js'
 
 export default class CryptableProvider {
   constructor(protected app: ApplicationService) {}
@@ -23,6 +24,13 @@ export default class CryptableProvider {
   async boot() {
     const { DatabaseQueryBuilder } = await this.app.import('@adonisjs/lucid/database')
     defineMethodDatabase(DatabaseQueryBuilder)
+
+    /**
+     * Registered once while booting. The macros branch on the connection
+     * name at query time, so they work for every driver at once.
+     */
+    const { ModelQueryBuilder } = await this.app.import('@adonisjs/lucid/orm')
+    defineMethodModel(ModelQueryBuilder)
   }
 }
 

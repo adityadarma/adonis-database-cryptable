@@ -105,4 +105,44 @@ test.group('Provider', () => {
     assert.isFunction((DatabaseQueryBuilder as any).prototype.orWhereEncrypted)
     assert.isFunction((DatabaseQueryBuilder as any).prototype.orderByEncrypted)
   })
+
+  test('register the macros on the model query builder while booting', async ({ assert }) => {
+    const app = await createApp({ key: SECRET_KEY, default: 'mysql' })
+    const provider = new CryptableProvider(app)
+
+    provider.register()
+    await provider.boot()
+
+    const { ModelQueryBuilder } = await import('@adonisjs/lucid/orm')
+
+    assert.isFunction((ModelQueryBuilder as any).prototype.whereEncrypted)
+    assert.isFunction((ModelQueryBuilder as any).prototype.orWhereEncrypted)
+    assert.isFunction((ModelQueryBuilder as any).prototype.orderByEncrypted)
+  })
+
+  test('resolving a driver does not register any macro', async ({ assert }) => {
+    const app = await createApp({ key: SECRET_KEY, default: 'mysql' })
+
+    new CryptableProvider(app).register()
+    const manager = await app.container.make('cryptable.manager')
+
+    const { ModelQueryBuilder } = await import('@adonisjs/lucid/orm')
+    const macro = (ModelQueryBuilder as any).macro
+    let calls = 0
+    ;(ModelQueryBuilder as any).macro = (...args: any[]) => {
+      calls++
+      return macro.apply(ModelQueryBuilder, args)
+    }
+
+    try {
+      // "use()" used to re-register three macros on every call, which the
+      // mixin triggers once per encrypted field per row.
+      manager.use('mysql')
+      manager.use('postgres')
+
+      assert.equal(calls, 0)
+    } finally {
+      ;(ModelQueryBuilder as any).macro = macro
+    }
+  })
 })

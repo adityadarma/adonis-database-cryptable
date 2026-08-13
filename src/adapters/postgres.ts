@@ -35,8 +35,9 @@ export default class PostgreSql implements Cryptable {
 
   async isEncrypted(value: any): Promise<boolean> {
     try {
-      return (await this.decrypt(value)) !== false ? true : false
-    } catch (error) {
+      await this.decrypt(value)
+      return true
+    } catch {
       return false
     }
   }
