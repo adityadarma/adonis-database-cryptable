@@ -8,6 +8,13 @@
 
 Database Encryption is a feature that allows developers to store data with encrypted and consume again with data decrypted. This feature provides a structured and organized approach to managing application database, making it easier to query.
 
+## Compatibility
+
+| AdonisJS | Lucid | Node   |
+| -------- | ----- | ------ |
+| v6       | v21   | >=20.6 |
+| v7       | v22   | >=24   |
+
 ## Installation
 
 ```sh
